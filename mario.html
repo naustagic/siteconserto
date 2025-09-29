@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Super Mario Styled Footer — Pure HTML/CSS/JS</title>
+<style>
+  :root{
+    --footer-height: clamp(260px, 34vh, 420px);
+    --sky-top: #8ed7ff;
+    --sky-bottom: #6bcdf7;
+    --tree-dark: #216a1a;
+    --tree-mid: #2f8a2f;
+    --bush: #57c34f;
+    --ground-1: #caa071;
+    --ground-2: #e6cf86;
+    --accent: #ffd24d;
+    --muted: rgba(255,255,255,0.92);
+    --block-size: 72px;
+    --max-width: 1200px;
+    --focus-ring: rgba(255,210,77,0.22);
+  }
+
+  /* Reset & page framing */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{display:flex;align-items:flex-end;justify-content:center;background:#0b0b0d;font-family:Inter,system-ui,Arial,sans-serif;padding:28px;color:#fff}
+
+  /* Footer container */
+  .mario-footer{
+    width:100%;
+    max-width:var(--max-width);
+    height:var(--footer-height);
+    position:relative;
+    overflow:hidden;
+    border-radius:12px;
+    box-shadow:0 16px 48px rgba(0,0,0,.65);
+    background: linear-gradient(180deg, var(--sky-top) 0%, #bfe9ff 28%, #cfeef2 42%, #9fe08d 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* Parallax layers (SVG backgrounds) */
+  .layer { position:absolute; inset:0; pointer-events:none; transform-origin:left center; }
+  .layer .bg-far{ z-index:0; opacity:0.95; }
+  .layer .bg-mid{ z-index:1; opacity:0.98; transform: translateZ(0); }
+  .layer .clouds{ z-index:2; opacity:0.98; }
+
+  /* Foreground ground strip that scrolls */
+  .ground {
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:120px;
+    z-index:6;
+    border-top-left-radius:12px;
+    border-top-right-radius:12px;
+    box-shadow: inset 0 8px 0 rgba(255,255,255,0.03);
+    background:
+      repeating-linear-gradient(90deg, var(--ground-1) 0 36px, #b47b54 36px 72px),
+      linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02));
+    transform-origin:left center;
+    animation: groundMove 8s linear infinite;
+  }
+
+  @keyframes groundMove { from{ transform: translateX(0) } to{ transform: translateX(-40%) } }
+
+  /* Trees/forest parallax animations */
+  .forest-far { position:absolute; left:0; right:0; bottom:64px; height:180px; z-index:1; animation: forestFar 24s linear infinite; }
+  .forest-mid { position:absolute; left:0; right:0; bottom:84px; height:150px; z-index:2; animation: forestMid 18s linear infinite; opacity:.98 }
+  @keyframes forestFar { from{ transform: translateX(0) } to{ transform: translateX(-30%) } }
+  @keyframes forestMid { from{ transform: translateX(0) } to{ transform: translateX(-18%) } }
+
+  /* Clouds floating */
+  .cloud { position:absolute; z-index:3; opacity:0.98; filter: drop-shadow(0 8px 14px rgba(0,0,0,0.12)); }
+  .cloud.c1{ left:6%; top:6%; transform: translateZ(0); animation: cloudFloat 22s linear infinite; }
+  .cloud.c2{ left:48%; top:10%; transform: scale(.92); animation: cloudFloat 28s linear infinite; }
+  @keyframes cloudFloat { from{ transform: translateX(0) } to{ transform: translateX(-220px) } }
+
+  /* Layout: stage with left meta and center playzone */
+  .stage { position:relative; z-index:8; display:flex; align-items:flex-end; gap:1rem; height:100%; padding:1.2rem 3rem; }
+  .left { flex:1; color:var(--muted); pointer-events:none; }
+  .meta .title { font-weight:700; color:#fff; font-size:1.05rem; margin-bottom:.35rem }
+  .meta .links { display:flex; gap:.6rem; flex-wrap:wrap }
+  .meta .links a{ color:var(--muted); text-decoration:none; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:.35rem .6rem; border-radius:8px; font-size:.86rem; pointer-events:auto }
+
+  /* play zone with blocks */
+  .playzone { width:440px; max-width:48%; position:relative; height:220px; display:flex; align-items:flex-end; justify-content:center; gap:12px; pointer-events:auto; z-index:12 }
+  .block { width:var(--block-size); height:var(--block-size); background: linear-gradient(180deg,#f6a34a,#e58b28); border-radius:8px; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 0 rgba(0,0,0,.12), inset 0 -6px 0 rgba(0,0,0,0.06); cursor:pointer; user-select:none; transform-origin:center; position:relative; outline:none; }
+  .block .face { width:54px; height:54px; border-radius:6px; background: linear-gradient(180deg,#ffd27a,#ffb33a); display:flex; align-items:center; justify-content:center; font-family: "Press Start 2P", monospace; font-size:12px; color:#6a3400; text-shadow: 0 1px 0 rgba(255,255,255,.25) }
+  .block:active{ transform: translateY(4px) scale(.995) }
+
+  /* accessible focus ring */
+  .block:focus-visible { box-shadow: 0 0 0 6px var(--focus-ring) }
+
+  /* coin graphic (SVG-based) */
+  .coin { position:absolute; width:40px; height:40px; pointer-events:none; z-index:20; transform-origin:center; animation: coinPop 900ms cubic-bezier(.2,.8,.2,1); }
+  @keyframes coinPop {
+    0% { opacity:0; transform: translateY(8px) scale(.4) }
+    30% { opacity:1; transform: translateY(-44px) scale(1.08) rotateX(40deg) }
+    60% { transform: translateY(-72px) scale(.94) rotateX(160deg) }
+    100% { transform: translateY(-110px) scale(.86) rotateX(260deg); opacity:0 }
+  }
+
+  /* splinter particles */
+  .spark { position:absolute; width:8px; height:3px; border-radius:2px; background:var(--accent); pointer-events:none; z-index:19; filter:drop-shadow(0 8px 12px rgba(255,173,48,0.23)); opacity:0.95 }
+
+  /* small decorative bushes */
+  .bush { width:96px; height:68px; border-radius:999px 999px 36px 36px; background: linear-gradient(180deg,var(--bush), darken(var(--bush), 6%)); box-shadow: inset 0 -8px 12px rgba(0,0,0,0.06); }
+
+  /* responsive adjustments */
+  @media (max-width:980px){ .playzone{ width:320px } .left{ display:none } .stage{ padding:1rem } }
+  @media (max-width:600px){ .mario-footer{ height:300px } .playzone{ width:260px } .block{ width:56px; height:56px } .block .face{ width:44px; height:44px; font-size:10px } .meta{ display:none } }
+
+  /* reduced motion: stop animations */
+  @media (prefers-reduced-motion: reduce) {
+    .forest-far, .forest-mid, .ground, .cloud { animation: none !important }
+    .coin { animation: none !important; transform: translateY(-72px) scale(1) !important; opacity:1 !important }
+  }
+
+  /* tiny sparkle on hover */
+  .block:hover::after{
+    content:"";
+    position:absolute;
+    width:18px;height:18px;
+    left:12px; top:-6px;
+    background: radial-gradient(circle at 30% 30%, #fff6a8, #ffd24d 40%, transparent 41%);
+    filter: blur(4px);
+    opacity:.98;
+    transform-origin:center;
+    animation: sparkle 700ms ease-out;
+    pointer-events:none;
+  }
+  @keyframes sparkle {
+    0%{ transform: scale(.6); opacity:0 }
+    30%{ transform: scale(1.08); opacity:1 }
+    100%{ transform: scale(.4) translateY(-18px); opacity:0 }
+  }
+
+  /* utility */
+  .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap }
+</style>
+</head>
+<body>
+
+<!-- Single-file Mario-themed footer -->
+<footer class="mario-footer" id="marioFooter" role="contentinfo" aria-label="Super Mario themed footer">
+  <!-- Layered vector backgrounds (SVG inline) -->
+  <div class="layer">
+    <!-- Far background: simple stylized rolling hills/trees repeated with pattern -->
+    <svg class="bg-far" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMid slice" style="position:absolute; left:0; top:0; width:220%; height:100%;" aria-hidden="true">
+      <defs>
+        <linearGradient id="hillGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#6bd37b" />
+          <stop offset="100%" stop-color="#3f9d39" />
+        </linearGradient>
+        <radialGradient id="fog" cx="50%" cy="20%" r="60%">
+          <stop offset="0%" stop-color="rgba(255,255,255,.18)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </radialGradient>
+      </defs>
+
+      <!-- repeated simple tree blobs -->
+      <g fill="url(#hillGrad)" opacity="0.95">
+        <circle cx="60" cy="160" r="64"/>
+        <circle cx="180" cy="148" r="78"/>
+        <circle cx="320" cy="164" r="70"/>
+        <circle cx="480" cy="150" r="82"/>
+        <circle cx="640" cy="160" r="66"/>
+        <circle cx="800" cy="148" r="74"/>
+        <circle cx="960" cy="162" r="72"/>
+        <circle cx="1120" cy="150" r="86"/>
+        <!-- the pattern repeats by rendering beyond viewBox width (we set width:220%) -->
+      </g>
+      <rect x="0" y="0" width="1200" height="240" fill="url(#fog)" />
+    </svg>
+  </div>
+
+  <div class="layer">
+    <!-- Mid forest layer -->
+    <svg class="forest-mid" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid slice" style="position:absolute; left:0; top:0; width:190%; height:72%;" aria-hidden="true">
+      <defs>
+        <linearGradient id="treeShade" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#3fa84a"/>
+          <stop offset="100%" stop-color="#2f6b2a"/>
+        </linearGradient>
+      </defs>
+      <g fill="url(#treeShade)">
+        <!-- stylized trees -->
+        <ellipse cx="70" cy="128" rx="48" ry="36"/>
+        <ellipse cx="170" cy="118" rx="60" ry="44"/>
+        <ellipse cx="290" cy="130" rx="54" ry="40"/>
+        <ellipse cx="430" cy="118" rx="66" ry="48"/>
+        <ellipse cx="570" cy="128" rx="52" ry="40"/>
+        <ellipse cx="690" cy="112" rx="58" ry="44"/>
+        <ellipse cx="830" cy="126" rx="54" ry="40"/>
+        <ellipse cx="950" cy="114" rx="62" ry="46"/>
+        <ellipse cx="1090" cy="120" rx="56" ry="44"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="layer clouds" aria-hidden="true">
+    <!-- decorative clouds (simple groups) -->
+    <div class="cloud c1" style="width:160px;height:56px;">
+      <svg viewBox="0 0 160 56" width="160" height="56" aria-hidden="true">
+        <g fill="#fff">
+          <ellipse cx="28" cy="30" rx="22" ry="18"/>
+          <ellipse cx="60" cy="22" rx="30" ry="20"/>
+          <ellipse cx="100" cy="28" rx="24" ry="18"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cloud c2" style="width:220px;height:70px;">
+      <svg viewBox="0 0 220 70" width="220" height="70" aria-hidden="true">
+        <g fill="#fff">
+          <ellipse cx="44" cy="36" rx="30" ry="24"/>
+          <ellipse cx="92" cy="28" rx="44" ry="28"/>
+          <ellipse cx="150" cy="34" rx="34" ry="26"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Foreground objects: bushes and ground -->
+  <div class="forest-foreground" aria-hidden="true">
+    <svg viewBox="0 0 1200 160" preserveAspectRatio="xMidYMax slice" style="position:absolute; left:0; right:0; bottom:84px; width:200%; height:120px; z-index:4">
+      <defs>
+        <linearGradient id="bushGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#66d67a"/>
+          <stop offset="100%" stop-color="#2faa2f"/>
+        </linearGradient>
+      </defs>
+      <g fill="url(#bushGrad)">
+        <ellipse cx="60" cy="78" rx="48" ry="36"/>
+        <ellipse cx="150" cy="70" rx="64" ry="52"/>
+        <ellipse cx="280" cy="82" rx="54" ry="40"/>
+        <ellipse cx="420" cy="70" rx="46" ry="36"/>
+        <ellipse cx="560" cy="78" rx="58" ry="44"/>
+        <ellipse cx="700" cy="66" rx="52" ry="40"/>
+        <ellipse cx="820" cy="76" rx="44" ry="36"/>
+        <ellipse cx="960" cy="68" rx="64" ry="52"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Stage content -->
+  <div class="stage" role="presentation" aria-hidden="false">
+    <!-- Left meta: links -->
+    <div class="left meta" aria-hidden="false">
+      <div class="title">Super Mario Footer — Demo</div>
+      <div class="links" aria-hidden="true">
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div style="margin-top:.5rem; font-size:.82rem; opacity:.95">© 2025 — Demo footer</div>
+    </div>
+
+    <!-- Play zone: interactive blocks and small platform -->
+    <div class="playzone" id="playzone" aria-live="polite">
+      <!-- Platform (visual) -->
+      <svg viewBox="0 0 440 220" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <!-- ground strip -->
+        <rect x="0" y="170" width="440" height="50" rx="10" fill="#caa071" />
+        <!-- a decorative raised platform -->
+        <rect x="132" y="110" width="180" height="28" rx="6" fill="#5cc24b" stroke="#2f8a2f" stroke-width="4"/>
+        <!-- sample bricks row near left -->
+        <g id="bricks" transform="translate(28,120)">
+          <rect x="0" y="0" width="32" height="32" rx="4" fill="#b74b2b" stroke="#7a2f20" stroke-width="2" />
+          <rect x="40" y="0" width="32" height="32" rx="4" fill="#b74b2b" stroke="#7a2f20" stroke-width="2" />
+        </g>
+
+        <!-- Question blocks as <foreignObject> so CSS focus works; we'll overlay HTML buttons on top instead for better accessibility -->
+      </svg>
+
+      <!-- accessible interactive blocks (HTML elements positioned above the SVG) -->
+      <div style="position:absolute; left:44px; bottom:74px;">
+        <div class="block" role="button" tabindex="0" aria-label="Question block — press to get a coin" data-block-index="0">
+          <div class="face">?</div>
+        </div>
+      </div>
+
+      <div style="position:absolute; left:132px; bottom:74px;">
+        <div class="block" role="button" tabindex="0" aria-label="Question block — press to get a coin" data-block-index="1">
+          <div class="face">!</div>
+        </div>
+      </div>
+
+      <div style="position:absolute; left:220px; bottom:74px;">
+        <div class="block" role="button" tabindex="0" aria-label="Question block — press to get a coin" data-block-index="2">
+          <div class="face">✦</div>
+        </div>
+      </div>
+
+    </div><!-- end playzone -->
+  </div><!-- end stage -->
+
+  <!-- Ground strip bottom (animated) -->
+  <div class="ground" aria-hidden="true"></div>
+
+  <!-- Hidden live region for a11y feedback -->
+  <div id="a11yAnnounce" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+</footer>
+
+<script>
+/* Vanilla JS: coin spawn + splinters (particles) + keyboard accessibility + reduced-motion handling
+   - No external libs
+   - Particles are DOM nodes that are removed after animation completes
+*/
+
+(function(){
+  const footer = document.getElementById('marioFooter');
+  const playzone = document.getElementById('playzone');
+  const announce = document.getElementById('a11yAnnounce');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Create coin SVG element (returns DOM node)
+  function createCoinEl(){
+    const el = document.createElement('div');
+    el.className = 'coin';
+    el.innerHTML = `
+      <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden="true">
+        <defs>
+          <radialGradient id="cg" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#fffacd"/>
+            <stop offset="40%" stop-color="#ffd24d"/>
+            <stop offset="85%" stop-color="#e0a800"/>
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="28" fill="url(#cg)" stroke="#b68600" stroke-width="2"></circle>
+        <text x="32" y="38" font-size="20" font-family="monospace" text-anchor="middle" fill="#6b3d00" font-weight="700">¢</text>
+      </svg>`;
+    return el;
+  }
+
+  // spawn coin at relative x,y within playzone
+  function spawnCoinAt(x, y){
+    const container = playzone;
+    const coin = createCoinEl();
+    coin.style.left = (x - 20) + 'px';
+    coin.style.bottom = (y + 28) + 'px';
+    container.appendChild(coin);
+
+    // spark particles
+    for(let i=0;i<8;i++){
+      createSpark(container, x + (Math.random()-0.5)*28, y + 18 + (Math.random()*6));
+    }
+
+    // announce for screen readers
+    announce.textContent = 'You got a coin!';
+
+    // remove coin after animation
+    if(prefersReduced){
+      // no animation: leave short timeout then remove
+      setTimeout(()=> coin.remove(), 700);
+      return;
+    }
+    setTimeout(()=> coin.remove(), 900);
+  }
+
+  // create an individual spark (splinter) and animate via Web Animations API
+  function createSpark(container, x, y){
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = (x - 4) + 'px';
+    s.style.bottom = (y - 2) + 'px';
+    s.style.width = (6 + Math.random()*8) + 'px';
+    s.style.height = (2 + Math.random()*4) + 'px';
+    container.appendChild(s);
+
+    if(prefersReduced){
+      // simple fade then remove
+      s.animate([{ opacity:1, transform:'translateY(0) rotate(0deg)' }, { opacity:0, transform:'translateY(-14px) rotate(10deg)' }], { duration: 450 }).onfinish = ()=> s.remove();
+      return;
+    }
+
+    const dx = (Math.random()-0.5) * 160;
+    const dy = - (60 + Math.random()*90);
+    const rot = Math.random()*720 - 360;
+    const dur = 600 + Math.random()*600;
+
+    s.animate([
+      { transform: 'translate(0,0) rotate(0deg)', opacity:1 },
+      { transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity:0 }
+    ], { duration: dur, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = ()=> s.remove();
+  }
+
+  // attach handlers to blocks
+  const blocks = Array.from(playzone.querySelectorAll('[role="button"]'));
+
+  blocks.forEach(block => {
+    // click handler
+    block.addEventListener('click', (e) => {
+      // compute relative coordinates within playzone
+      const rect = block.getBoundingClientRect();
+      const pRect = playzone.getBoundingClientRect();
+      const x = rect.left - pRect.left + rect.width/2;
+      const y = pRect.height - (rect.top - pRect.top); // bottom coordinate within playzone
+      spawnCoinAt(x, y);
+      // tiny interaction feedback: pulse
+      block.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-6px)' }, { transform: 'translateY(0)' }], { duration: 220, easing: 'ease-out' });
+    });
+
+    // keyboard support (Enter / Space)
+    block.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        block.click();
+      }
+    });
+
+    // focus visible class handled by CSS :focus-visible, but add fallback for browsers not supporting it
+    block.addEventListener('focus', ()=> block.classList.add('js-focus'));
+    block.addEventListener('blur', ()=> block.classList.remove('js-focus'));
+  });
+
+  // Mouse parallax subtle effect for clouds / forest: small transforms on mouse move, disabled on touch and reduced-motion
+  if(!prefersReduced && !('ontouchstart' in window)){
+    const clouds = document.querySelectorAll('.cloud');
+    const forests = document.querySelectorAll('.forest-mid, .forest-foreground, .bg-far');
+
+    window.addEventListener('mousemove', (ev)=>{
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const nx = (ev.clientX - w/2) / (w/2);
+      const ny = (ev.clientY - h/2) / (h/2);
+
+      clouds.forEach((c, i) => {
+        const depth = (i % 2) * 0.6 + 0.6;
+        c.style.transform = `translate(${nx * 12 * depth}px, ${ny * 6 * depth}px)`;
+      });
+      forests.forEach((f, i) => {
+        const depth = 0.2 + (i*0.08);
+        f.style.transform = `translateX(${nx * 6 * depth}px)`;
+      });
+    });
+  }
+
+  // Ensure focus-visible fallback styling for keyboard users
+  document.addEventListener('keydown', function onFirstTab(e) {
+    if(e.key === 'Tab'){
+      document.body.classList.add('user-is-tabbing');
+      window.removeEventListener('keydown', onFirstTab);
+    }
+  });
+
+  // Optional: expose a global function to programmatically spawn a coin (useful for integration)
+  window.__marioFooterSpawnCoin = function(index=0){ // index unused, just spawn at center of block index if exists
+    const block = blocks[index] || blocks[0];
+    if(block){
+      block.click();
+      block.focus({ preventScroll:true });
+    }
+  };
+
+})();
+</script>
+
+</body>
+</html>

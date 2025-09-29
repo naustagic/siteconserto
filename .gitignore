@@ -1,0 +1,15 @@
+# Ignorar a pasta inteira
+mario/
+
+# Não ignorar o arquivo mario.html (se por acaso você tiver uma regra global *mario*)
+!mario.html
+
+# Ignorar somente arquivos dentro de templates que contenham 'mario' no nome
+templates/*mario*
+
+# Ignorar um arquivo específico com espaço no nome (escape do espaço)
+templates/footer\ mario.php
+
+# Ainda assim manter estes arquivos originais (se quiser garantir que NÃO sejam ignorados)
+!templates/footer\ original.php
+!templates/header\ original.php
