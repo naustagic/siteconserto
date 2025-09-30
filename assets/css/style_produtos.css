@@ -1,0 +1,273 @@
+/* assets/css/style_produtos.css */
+
+/* --- Estilos da Grade de Produtos (index.php e produtos.php) --- */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+.product-card {
+    background-color: var(--cor-fundo-card);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px; /* Aumentei um pouco para um look mais moderno */
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: var(--cor-texto);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.product-card .card-image-container {
+    width: 100%;
+    /* A proporção 1:1 pode ser ajustada se suas imagens forem diferentes */
+    aspect-ratio: 1 / 1; 
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card .card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out, transform 0.4s ease;
+}
+
+.product-card:hover .card-image {
+    transform: scale(1.05);
+}
+
+/* --- @ATUALIZADO: Estilos para cards de produtos vendidos (menores) --- */
+.sold-product-card .card-image-container {
+    aspect-ratio: 4 / 3; /* Proporção um pouco mais retangular */
+}
+.sold-product-card .card-title {
+    font-size: 1rem; /* Título menor para diferenciar */
+}
+.sold-product-card {
+    opacity: 0.85; /* Levemente esmaecido para indicar que já foi vendido */
+}
+
+/* Estilos Unificados para Faixas de Destaque e Vendido */
+.badge {
+    position: absolute;
+    top: 10px;
+    right: -35px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    width: 150px;
+    text-align: center;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.badge-vendido {
+    background-color: #dc2626; /* Vermelho forte */
+}
+
+.badge-destaque {
+    background-color: var(--cor-primaria);
+}
+
+.product-card .card-content {
+    padding: 1.5rem;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card .card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--cor-texto);
+}
+
+.product-card .card-price {
+    margin-top: auto;
+}
+
+.product-card .original-price {
+    text-decoration: line-through;
+    color: var(--cor-texto);
+    opacity: 0.6;
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+.product-card .discount-price {
+    color: #2ecc71;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.product-card .normal-price {
+    color: var(--cor-texto);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* --- @NOVO: Estilos para a Barra de Filtros (index.php) --- */
+.filter-bar {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.filter-group label {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--cor-texto-secundaria);
+}
+
+.filter-input,
+.filter-select {
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.filter-bar button {
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    height: 45px; /* Alinha altura com os inputs */
+}
+
+/* --- @NOVO: Estilos para o Skeleton Loader (index.php) --- */
+#products-skeleton-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(243, 244, 246, 0.95);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: opacity 0.3s;
+    border-radius: 12px;
+}
+
+#products-skeleton-loader img {
+    max-height: 80px;
+    opacity: 0.7;
+}
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    padding: 2rem;
+}
+
+.skeleton-card {
+    background-color: #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.skeleton-card .skeleton-img {
+    height: 220px;
+    background-color: #d1d5db;
+}
+
+.skeleton-card .skeleton-text {
+    height: 20px;
+    background-color: #d1d5db;
+    margin: 1rem;
+    border-radius: 6px;
+}
+
+.skeleton-card .skeleton-text-short {
+    width: 60%;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: .5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+
+/* --- Estilos da Página de Detalhes (produto_detalhes.php) - Inalterado --- */
+.product-detail-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+    .product-detail-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.product-gallery { flex: 1 1 500px; }
+.main-image-wrapper { border-radius: 8px; overflow: hidden; margin-bottom: 1rem; cursor: zoom-in; }
+.main-image-wrapper img { width: 100%; display: block; transition: opacity 0.3s ease-in-out, transform 0.2s ease; }
+.thumbnail-wrapper { display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap; }
+.thumbnail-wrapper img { width: 80px; height: 80px; object-fit: cover; border: 2px solid transparent; border-radius: 5px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.thumbnail-wrapper img:hover { border-color: var(--cor-primaria); opacity: 0.8; }
+.thumbnail-wrapper img.active { border-color: var(--cor-primaria); box-shadow: 0 0 8px var(--cor-primaria); }
+.product-info { flex: 1 1 400px; }
+.product-info .price-box { background-color: rgba(var(--fundo-card-rgb), 0.5); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; }
+.whatsapp-button { display: inline-block; background-color: #25D366; color: white; padding: 15px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: background-color 0.3s, transform 0.2s; text-align: center; }
+.whatsapp-button:hover { background-color: #128C7E; color: white; transform: scale(1.05); }
+.whatsapp-button i { margin-right: 10px; }

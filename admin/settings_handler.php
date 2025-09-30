@@ -8,6 +8,7 @@ require_once '../includes/functions.php';
 
 // Função para atualizar ou inserir uma configuração
 function update_config($pdo, $key, $value) {
+    // Esta função usa a tabela 'config_site', conforme a estrutura original do seu projeto.
     $sql = "INSERT INTO config_site (config_key, config_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE config_value = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$key, $value, $value]);
@@ -42,12 +43,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_body_bg') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
+    $action = $_POST['action'] ?? '';
+
     // Processa o formulário principal da aba "Aparência"
     if (isset($_POST['save_appearance'])) {
         
-        // ======================================================
-        // 2. CORREÇÃO NA VALIDAÇÃO DO TEMA
-        // ======================================================
+        // Validação do tema
         if (isset($_POST['site_theme']) && array_key_exists($_POST['site_theme'], $themes)) {
             update_config($pdo, 'site_theme', $_POST['site_theme']);
         }
@@ -140,10 +141,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: settings.php?tab=aparencia');
         exit();
     }
+
+    // NOVO BLOCO: Processa o formulário da aba "Conteúdo e Integrações"
+    elseif ($action === 'save_content_integrations') {
+        
+        // Salva o conteúdo do Guia de Envio
+        if (isset($_POST['guia_envio_conteudo'])) {
+            update_config($pdo, 'guia_envio_conteudo', $_POST['guia_envio_conteudo']);
+        }
+
+        // Salva o número do WhatsApp (removendo caracteres não numéricos)
+        if (isset($_POST['whatsapp_number'])) {
+            $whatsapp_number = preg_replace('/[^0-9]/', '', $_POST['whatsapp_number']);
+            update_config($pdo, 'whatsapp_number', $whatsapp_number);
+        }
+
+        // Salva as integrações (Telegram, Facebook)
+        if (isset($_POST['telegram_token'])) {
+            update_config($pdo, 'telegram_token', trim($_POST['telegram_token']));
+        }
+        if (isset($_POST['telegram_chat_id'])) {
+            update_config($pdo, 'telegram_chat_id', trim($_POST['telegram_chat_id']));
+        }
+        if (isset($_POST['facebook_pixel_id'])) {
+            update_config($pdo, 'facebook_pixel_id', trim($_POST['facebook_pixel_id']));
+        }
+
+        $_SESSION['success_message'] = 'Configurações de conteúdo e integrações salvas com sucesso!';
+        header('Location: settings.php?tab=conteudo');
+        exit();
+    }
+
+    // Processa o formulário da aba "Avançado"
+    elseif ($action === 'save_advanced') {
+        if (isset($_POST['sold_display_days'])) {
+            // Garante que o valor seja um inteiro não negativo antes de salvar
+            $days = abs((int)$_POST['sold_display_days']);
+            update_config($pdo, 'sold_display_days', $days);
+        }
+        $_SESSION['success_message'] = 'Configurações avançadas salvas com sucesso!';
+        header('Location: settings.php?tab=avancado');
+        exit();
+    }
     
-} else {
-    // Redireciona se o acesso não for via POST ou GET com a ação correta
-    header('Location: settings.php');
-    exit();
 }
+
+// Redireciona se o acesso não for via POST ou GET com a ação correta
+header('Location: settings.php');
+exit();
 ?>

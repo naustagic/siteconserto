@@ -84,6 +84,9 @@ $brand_name_color = get_config($pdo, 'brand_name_color', '#FFFFFF');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <link rel="stylesheet" href="assets/css/style_produtos.css">
+    
     <style>
         :root {
             <?php foreach($current_theme as $key => $value) { echo "$key: $value;"; } ?>
@@ -434,7 +437,7 @@ textarea[readonly].input-valid {
 }
 
 /* --- FIM: SISTEMA DE ESTILOS PARA FORMULÁRIOS --- */
-               
+                
         
         /* ================================================================== */
         /* --- INÍCIO: CSS ATUALIZADO DO RODAPÉ E ANIMAÇÃO --- */
@@ -520,6 +523,7 @@ textarea[readonly].input-valid {
             -webkit-mask-size: 100% 100%;
             mask-size: 100% 100%;
             -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
         }
         .dark-theme .site-footer-content::before { background-color: #0d1117; }
 
@@ -570,6 +574,7 @@ textarea[readonly].input-valid {
 
             <div class="nav-links space-x-6 text-sm font-medium" id="nav-links">
                 <a href="index.php#servicos" class="nav-link">Serviços</a>
+                <a href="produtos.php" class="nav-link">Produtos</a>
                 <a href="solicitar-reparo.php" class="nav-link">Solicitar Reparo</a>
                 <a href="acompanhar-os.php" class="nav-link">Acompanhar OS</a>
                 <a href="admin/login.php" class="brand-bg text-white px-4 py-2 rounded-md brand-bg-hover transition-all">Painel</a>

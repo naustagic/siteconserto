@@ -22,7 +22,7 @@ $all_statuses_from_table = $pdo->query("SELECT name FROM os_statuses ORDER BY na
 
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold">Detalhes da OS #<?php echo $os['id']; ?></h1>
-    <a href="os_print.php?id=<?php echo $os['id']; ?>" target="_blank" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-md hover:bg-gray-300">Imprimir OS</a>
+    <a href="os_print.php?id=<?php echo $os['id']; ?>" target="_blank" class=" text-gray-700 font-bold py-2 px-4 rounded-md hover:bg-gray-300" style="background-color: var(--cor-primaria);">Imprimir OS</a>
 </div>
 
 <?php
@@ -56,7 +56,7 @@ if (isset($_SESSION['success_message'])) {
                 <p><strong>Marca/Modelo:</strong> <?php echo sanitize_output($os['dispositivo_marca'] . ' / ' . $os['dispositivo_modelo']); ?></p>
             <?php endif; ?>
             <p class="mt-2"><strong>Descrição do Cliente:</strong></p>
-            <p class="text-sm p-2 bg-gray-100 rounded-md"><?php echo nl2br(sanitize_output($os['descricao_problema'])); ?></p>
+            <p class="text-sm p-2 text-white rounded-md" style="background-color: var(--cor-primaria);"><?php echo nl2br(sanitize_output($os['descricao_problema'])); ?></p>
 
             <?php if (!empty($os['media_path'])): ?>
             <div class="mt-4 pt-4 border-t">
@@ -118,7 +118,7 @@ if (isset($_SESSION['success_message'])) {
                 <li>
                     <p class="font-bold"><?php echo sanitize_output($h['status_novo']); ?></p>
                     <p class="text-sm text-gray-500"><?php echo date('d/m/Y H:i', strtotime($h['data_alteracao'])); ?></p>
-                    <?php if($h['observacao']): ?><p class="text-sm mt-1 p-1 bg-yellow-50 rounded"><?php echo sanitize_output($h['observacao']); ?></p><?php endif; ?>
+                    <?php if($h['observacao']): ?><p class="text-sm mt-1 p-1 text-white rounded" style="background-color: var(--cor-primaria);"><?php echo sanitize_output($h['observacao']); ?></p><?php endif; ?>
                 </li>
                 <?php endforeach; ?>
             </ul>

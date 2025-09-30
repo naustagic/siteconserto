@@ -44,8 +44,8 @@ if (isset($_SESSION['success_message'])) {
                     </select>
                 </div>
                 <div>
-                    <label for="url" class="block text-sm font-medium">URL do Link</label>
-                    <input type="url" id="url" name="url" placeholder="https://..." required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <label for="url" class="block text-sm font-medium" >URL do Link</label>
+                    <input type="url" id="url" name="url" placeholder="https://..." required class="mt-1 block w-full rounded-md bg-gray-700 border-gray-300 shadow-sm">
                 </div>
                 <button type="submit" class="brand-bg text-white font-bold py-2 px-6 rounded-md w-full">Adicionar</button>
             </form>
@@ -58,7 +58,7 @@ if (isset($_SESSION['success_message'])) {
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-700 border-b-2 border-gray-200">
                             <th class="p-2 text-left">Ícone</th>
                             <th class="p-2 text-left">URL</th>
                             <th class="p-2 text-right">Ações</th>

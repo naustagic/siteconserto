@@ -4,28 +4,33 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // --- LÓGICA DE TEMA ---
+// Comentário: A variável '--cor-primaria-rgb' foi adicionada para ser usada em efeitos de sombra (box-shadow) no novo CSS.
 $themes = [
-    'default' => ['--cor-primaria' => '#2563EB', '--cor-fundo' => '#F3F4F6', '--cor-texto' => '#1F2937', '--cor-fundo-card' => '#FFFFFF', '--cor-sidebar' => '#1F2937'],
-    'dark' => ['--cor-primaria' => '#60A5FA', '--cor-fundo' => '#111827', '--cor-texto' => '#F9FAFB', '--cor-fundo-card' => '#1F2937', '--cor-sidebar' => '#111827'],
-    'ocean' => ['--cor-primaria' => '#0891B2', '--cor-fundo' => '#ECFEFF', '--cor-texto' => '#083344', '--cor-fundo-card' => '#FFFFFF', '--cor-sidebar' => '#164E63'],
+    'default' => ['--cor-primaria' => '#2563EB', '--cor-primaria-rgb' => '37, 99, 235', '--cor-fundo' => '#F3F4F6', '--cor-texto' => '#1F2937', '--cor-fundo-card' => '#FFFFFF', '--cor-sidebar' => '#1F2937'],
+    'dark' => ['--cor-primaria' => '#60A5FA', '--cor-primaria-rgb' => '96, 165, 250', '--cor-fundo' => '#111827', '--cor-texto' => '#F9FAFB', '--cor-fundo-card' => '#1F2937', '--cor-sidebar' => '#111827'],
+    'ocean' => ['--cor-primaria' => '#0891B2', '--cor-primaria-rgb' => '8, 145, 178', '--cor-fundo' => '#ECFEFF', '--cor-texto' => '#083344', '--cor-fundo-card' => '#FFFFFF', '--cor-sidebar' => '#164E63'],
+    'apmidias' => ['--cor-primaria' => '#F26522', '--cor-primaria-rgb' => '242, 101, 34', '--cor-fundo' => '#002D9C', '--cor-texto' => '#FFFFFF', '--cor-fundo-card' => '#0A3A95', '--cor-sidebar' => '#0A3A95'],
 ];
 $current_theme_key = get_config($pdo, 'site_theme', 'default');
 $current_theme = $themes[$current_theme_key] ?? $themes['default'];
 // --- FIM DA LÓGICA DE TEMA ---
 
 $current_page = basename($_SERVER['PHP_SELF']);
-$is_dark_theme = ($current_theme_key === 'dark' || $current_theme_key === 'ocean');
+$is_dark_theme = ($current_theme_key === 'dark' || $current_theme_key === 'apmidias');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - ReparoPRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <link rel="stylesheet" href="assets/css/admin-styles.css">
+
     <style>
         :root {
             <?php foreach($current_theme as $key => $value) { echo "$key: $value;"; } ?>
@@ -42,7 +47,11 @@ $is_dark_theme = ($current_theme_key === 'dark' || $current_theme_key === 'ocean
         .bg-white { background-color: var(--cor-fundo-card) !important; }
         .text-gray-500 { color: #9CA3AF !important; }
         .text-gray-600, .text-gray-700 { color: #E5E7EB !important; }
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="color"], select, textarea { background-color: #374151; border-color: #4B5563; color: var(--cor-texto); }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="color"], select, textarea { 
+            background-color: #374151 !important; 
+            border-color: #4B5563 !important; 
+            color: var(--cor-texto) !important; 
+        }
         input::placeholder, textarea::placeholder { color: #9CA3AF; }
         table thead { background-color: #374151 !important; border-color: #4B5563 !important; }
         table tbody tr:hover { background-color: #4B5563 !important; }
@@ -71,14 +80,20 @@ $is_dark_theme = ($current_theme_key === 'dark' || $current_theme_key === 'ocean
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
             <a href="index.php" class="sidebar-link <?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">Dashboard</a>
             <a href="os_list.php" class="sidebar-link <?php echo in_array($current_page, ['os_list.php', 'os_details.php']) ? 'active' : ''; ?>">Ordens de Serviço</a>
+            
+            <a href="produtos_manager.php" class="sidebar-link <?php echo ($current_page == 'produtos_manager.php') ? 'active' : ''; ?>">Produtos</a>
+
             <?php if ($_SESSION['user_level'] === 'Admin'): ?>
             <a href="home_manager.php" class="sidebar-link <?php echo ($current_page == 'home_manager.php') ? 'active' : ''; ?>">Página Inicial</a>
             <a href="settings.php" class="sidebar-link <?php echo ($current_page == 'settings.php') ? 'active' : ''; ?>">Configurações</a>
+            
+            <a href="pagamentos_manager.php" class="sidebar-link <?php echo ($current_page == 'pagamentos_manager.php') ? 'active' : ''; ?>">Métodos de Pagamento</a>
+            
             <a href="reviews_manager.php" class="sidebar-link <?php echo ($current_page == 'reviews_manager.php') ? 'active' : ''; ?>">Avaliações</a>
             <a href="social_links_manager.php" class="sidebar-link <?php echo ($current_page == 'social_links_manager.php') ? 'active' : ''; ?>">Redes Sociais</a>
             <a href="form_manager.php" class="sidebar-link <?php echo in_array($current_page, ['form_manager.php', 'form_option_edit.php']) ? 'active' : ''; ?>">Gestor de Formulário</a>
             <a href="logistics_manager.php" class="sidebar-link <?php echo ($current_page == 'logistics_manager.php') ? 'active' : ''; ?>">Logística e Status</a>
-            <a href="reviews_manager.php" class="sidebar-link <?php echo ($current_page == 'reviews_manager.php') ? 'active' : ''; ?>">Avaliações</a>
+            
             <?php endif; ?>
         </nav>
         <div class="p-4 border-t border-gray-700">

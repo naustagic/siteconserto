@@ -1,6 +1,7 @@
 <?php
 require_once 'check_auth.php';
 if ($_SESSION['user_level'] !== 'Admin') { die("Acesso negado."); }
+include '../config/database.php';
 include 'templates/header.php';
 
 // --- LÓGICA DE PREPARAÇÃO ---
@@ -14,7 +15,6 @@ $themes = [
             '--cor-fundo' => '#F9FAFB',
             '--cor-texto' => '#1F2937',
             '--cor-fundo-card' => '#FFFFFF',
-            '--fundo-card-rgb' => '255, 255, 255'
         ]
     ],
     'dark' => [
@@ -24,7 +24,6 @@ $themes = [
             '--cor-fundo' => '#111827',
             '--cor-texto' => '#F9FAFB',
             '--cor-fundo-card' => '#1F2937',
-            '--fundo-card-rgb' => '31, 41, 55'
         ]
     ],
     'ocean' => [
@@ -34,7 +33,6 @@ $themes = [
             '--cor-fundo' => '#F0F9FF',
             '--cor-texto' => '#083344',
             '--cor-fundo-card' => '#FFFFFF',
-            '--fundo-card-rgb' => '255, 255, 255'
         ]
     ],
     'apmidias' => [
@@ -44,7 +42,6 @@ $themes = [
             '--cor-fundo' => '#002D9C',
             '--cor-texto' => '#FFFFFF',
             '--cor-fundo-card' => '#0A3A95',
-            '--fundo-card-rgb' => '10, 58, 149'
         ]
     ],
     'apmidias-light' => [
@@ -54,7 +51,6 @@ $themes = [
             '--cor-fundo' => '#F8F9FA',
             '--cor-texto' => '#212529',
             '--cor-fundo-card' => '#FFFFFF',
-            '--fundo-card-rgb' => '255, 255, 255'
         ]
     ],
 ];
@@ -62,24 +58,25 @@ $themes = [
 // Busca todas as configurações e banners do banco de dados
 $current_theme = get_config($pdo, 'site_theme', 'default');
 $current_logo = get_config($pdo, 'logo_path');
+$logo_light_path = get_config($pdo, 'logo_light_path');
 $guia_envio = get_config($pdo, 'guia_envio_conteudo');
 $telegram_token = get_config($pdo, 'telegram_token');
 $telegram_chat_id = get_config($pdo, 'telegram_chat_id');
 $facebook_pixel_id = get_config($pdo, 'facebook_pixel_id');
 $banners = $pdo->query("SELECT * FROM hero_banners ORDER BY sort_order ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// --- INÍCIO DA ADIÇÃO: Buscar novas configs de background ---
 $body_bg_enabled = get_config($pdo, 'body_bg_enabled', '0');
 $body_bg_image = get_config($pdo, 'body_bg_image_path', '');
 $body_bg_opacity = get_config($pdo, 'body_bg_overlay_opacity', '0.75');
-// --- FIM DA ADIÇÃO ---
 
-// --- INÍCIO DA ADIÇÃO: Buscar novas configs de Identidade Visual ---
 $site_title = get_config($pdo, 'site_title', 'ReparoPRO');
 $brand_name_text = get_config($pdo, 'brand_name_text', '');
 $brand_name_color = get_config($pdo, 'brand_name_color', '#FFFFFF');
-// --- FIM DA ADIÇÃO ---
 
+$sold_display_days = get_config($pdo, 'sold_display_days', '7');
+
+// NOVO: Busca o número do WhatsApp do banco de dados
+$whatsapp_number = get_config($pdo, 'whatsapp_number', '');
 
 // Textos padrão para o formulário de upload de banner
 $default_title = 'Seu Dispositivo em Mãos de Especialistas';
@@ -114,11 +111,12 @@ if (isset($_SESSION['error_message'])) {
 }
 ?>
 
-<div class="border-b border-gray-200 mb-6">
+<div class="border-b border-gray-200 dark:border-gray-700 mb-6">
     <nav class="-mb-px flex space-x-6" id="settings-tabs">
         <a href="#aparencia" data-tab="aparencia" class="tab-link active-tab py-4 px-1 border-b-2 font-medium text-sm">Tema e Aparência</a>
         <a href="#banners" data-tab="banners" class="tab-link py-4 px-1 border-b-2 font-medium text-sm">Banners (Carrossel)</a>
         <a href="#conteudo" data-tab="conteudo" class="tab-link py-4 px-1 border-b-2 font-medium text-sm">Conteúdo & Integrações</a>
+        <a href="#avancado" data-tab="avancado" class="tab-link py-4 px-1 border-b-2 font-medium text-sm">Avançado</a>
     </nav>
 </div>
 
@@ -229,14 +227,20 @@ if (isset($_SESSION['error_message'])) {
 </div>
 
 <div id="conteudo" class="tab-pane hidden">
-    <form action="content_handler.php" method="POST" class="bg-white p-6 rounded-lg shadow-md space-y-8 card">
-        <div>
+    <form action="settings_handler.php" method="POST" class="bg-white p-6 rounded-lg shadow-md space-y-8 card">
+        <input type="hidden" name="action" value="save_content_integrations"> <div>
             <h2 class="text-xl font-bold">Conteúdo da Página "Guia de Envio"</h2>
             <textarea id="guia-envio" name="guia_envio_conteudo" rows="10"><?php echo htmlspecialchars($guia_envio ?? ''); ?></textarea>
         </div>
         <div class="border-t pt-6">
             <h2 class="text-xl font-bold mb-4">Integrações</h2>
             <div class="space-y-4">
+                <div>
+                    <label for="whatsapp_number" class="block text-sm font-medium">Número do WhatsApp para Contato</label>
+                    <input type="text" id="whatsapp_number" name="whatsapp_number" value="<?php echo sanitize_output($whatsapp_number ?? ''); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Ex: 5574999998888">
+                    <p class="mt-2 text-sm text-gray-500">Formato recomendado: código do país (55) + DDD + número. Apenas dígitos.</p>
+                </div>
+
                 <div>
                     <label for="telegram_token" class="block text-sm font-medium">Token do Bot do Telegram</label>
                     <input type="text" id="telegram_token" name="telegram_token" value="<?php echo sanitize_output($telegram_token ?? ''); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
@@ -251,7 +255,24 @@ if (isset($_SESSION['error_message'])) {
                 </div>
             </div>
         </div>
-        <div class="mt-8 text-right"><button type="submit" class="brand-bg text-white font-bold py-2 px-6 rounded-md">Salvar Conteúdo e Integrações</button></div>
+        <div class="mt-8 text-right"><button type="submit" name="save_content_integrations" class="brand-bg text-white font-bold py-2 px-6 rounded-md">Salvar Conteúdo e Integrações</button></div>
+    </form>
+</div>
+
+<div id="avancado" class="tab-pane hidden">
+    <form action="settings_handler.php" method="POST" class="bg-white p-6 rounded-lg shadow-md card">
+        <input type="hidden" name="action" value="save_advanced">
+        <h2 class="text-xl font-bold mb-4">Configurações Avançadas</h2>
+        <div class="space-y-4">
+            <div>
+                <label for="sold_display_days" class="block text-sm font-medium">Tempo de Exibição de Produtos Vendidos (em dias)</label>
+                <input type="number" id="sold_display_days" name="sold_display_days" value="<?php echo sanitize_output($sold_display_days); ?>" class="mt-1 block w-full md:w-1/4 rounded-md border-gray-300 shadow-sm">
+                <p class="mt-2 text-sm text-gray-500">Defina por quantos dias um produto "vendido" deve continuar na loja. Use 0 para ocultar imediatamente.</p>
+            </div>
+        </div>
+        <div class="mt-8 text-right">
+            <button type="submit" name="save_advanced_button" class="brand-bg text-white font-bold py-2 px-6 rounded-md">Salvar Configurações</button>
+        </div>
     </form>
 </div>
 
@@ -359,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // --- INÍCIO DA ADIÇÃO: SCRIPT PARA O SLIDER DE OPACIDADE ---
+    // SCRIPT PARA O SLIDER DE OPACIDADE
     const opacitySlider = document.getElementById('body_bg_overlay_opacity');
     const opacityValueSpan = document.getElementById('opacity-value');
     if (opacitySlider && opacityValueSpan) {
@@ -368,7 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
             opacityValueSpan.textContent = percentage + '%';
         });
     }
-    // --- FIM DA ADIÇÃO ---
 });
 </script>
 

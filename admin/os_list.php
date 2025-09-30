@@ -51,7 +51,7 @@ $ordens_servico = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </select>
         <button type="submit" class="w-full md:w-auto brand-bg text-white font-bold py-2 px-4 rounded-md">Filtrar</button>
-        <a href="os_list.php" class="w-full md:w-auto text-center bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-md">Limpar</a>
+        <a href="os_list.php" class="w-full md:w-auto text-center bg-blue-700 text-gray-700 font-bold py-2 px-4 rounded-md">Limpar</a>
     </form>
 </div>
 
